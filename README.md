@@ -4,16 +4,23 @@ Reference tutorial: [APIs for Machine Learning - Made with ML](https://madewithm
 
 ## How to launch the server
 
-We'll be using Uvicorn, a fast ASGI server (it can run asynchronous code in a single process) to launch our application.
+We'll be using Uvicorn, a fast ASGI server (it can run asynchronous code in a single process) to launch our application. Use the following command to start the server
 
 ```bash
-uvicorn app.api:app \       # location of app (`app` directory > `api.py` script > `app` object)
-    --host 0.0.0.0 \        # localhost
-    --port 5000 \           # port 5000
-    --reload \              # reload every time we update
-    --reload-dir models \   # only reload on updates to `models` directory
-    --reload-dir app        # and the `app` directory
+uvicorn app.api:app \
+    --host 0.0.0.0 \
+    --port 5000 \
+    --reload \
+    --reload-dir app \
+    --reload-dir models
 ```
+
+where:
+
+- `uvicorn app.api:app` is the location of app (`app` directory > `api.py` script > `app` object);
+- `--reload` makes the server reload every time we update;
+- `--reload-dir app` makes it only reload on updates to the `app/` directory;
+- `--reload-dir models` makes it also reload on updates to the `models/` directory;
 
 **Observation**. If we want to manage multiple uvicorn workers to enable parallelism in our application, we can use Gunicorn in conjunction with Uvicorn.
 
