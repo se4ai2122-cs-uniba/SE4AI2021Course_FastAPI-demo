@@ -1,4 +1,4 @@
-"""Definitions for the objects used in our resource endpoints."""
+"""Definitions for the objects used by our resource endpoints."""
 
 from collections import namedtuple
 from enum import Enum

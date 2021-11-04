@@ -12,12 +12,12 @@ from fastapi import FastAPI, Request
 from app.schemas import IrisType, PredictPayload
 
 MODELS_DIR = Path("models/")
-models_list: List[dict] = []
+model_wrappers_list: List[dict] = []
 
 # Define application
 app = FastAPI(
     title="Yet another Iris example",
-    description="Making predictions on the Iris dataset using logistic regression.",
+    description="This API lets you make predictions on the Iris dataset using a couple of simple models.",
     version="0.1",
 )
 
@@ -57,19 +57,19 @@ def _load_models():
 
     for path in model_paths:
         with open(path, "rb") as file:
-            model = pickle.load(file)
-            models_list.append(model)
+            model_wrapper = pickle.load(file)
+            model_wrappers_list.append(model_wrapper)
 
 
 @app.get("/", tags=["General"])  # path operation decorator
 @construct_response
 def _index(request: Request):
-    """Health check."""
+    """Root endpoint."""
 
     response = {
         "message": HTTPStatus.OK.phrase,
         "status-code": HTTPStatus.OK,
-        "data": {"message": "Welcome to IRIS classifier!"},
+        "data": {"message": "Welcome to IRIS classifier! Please, read the `/docs`!"},
     }
     return response
 
@@ -85,7 +85,7 @@ def _get_models_list(request: Request):
             "parameters": model["params"],
             "accuracy": model["metrics"],
         }
-        for model in models_list
+        for model in model_wrappers_list
     ]
 
     response = {
@@ -100,7 +100,7 @@ def _get_models_list(request: Request):
 @app.post("/models/{type}", tags=["Prediction"])
 @construct_response
 def _predict(request: Request, type: str, payload: PredictPayload):
-    """Predicts sale price for a house given its numerical features."""
+    """Classifies Iris flowers based on sepal and petal sizes."""
 
     # sklearn's `predict()` methods expect a 2D array of shape [n_samples, n_features]
     # therefore, we need to convert our single data point into a 2D array
@@ -113,7 +113,7 @@ def _predict(request: Request, type: str, payload: PredictPayload):
         ]
     ]
 
-    model_wrapper = next((m for m in models_list if m["type"] == type), None)
+    model_wrapper = next((m for m in model_wrappers_list if m["type"] == type), None)
 
     if model_wrapper:
 
