@@ -9,10 +9,10 @@ from typing import Dict, List
 
 from fastapi import FastAPI, Request
 
-from app.schemas import IrisType, Model, PredictPayload
+from app.schemas import IrisType, PredictPayload
 
 MODELS_DIR = Path("models/")
-models_list: List[Model] = []
+models_list: List[dict] = []
 
 # Define application
 app = FastAPI(
@@ -55,14 +55,10 @@ def _load_models():
         filename for filename in MODELS_DIR.iterdir() if filename.suffix == ".pkl"
     ]
 
-    print(model_paths)
     for path in model_paths:
         with open(path, "rb") as file:
             model = pickle.load(file)
             models_list.append(model)
-
-    print("MODELS LIST")
-    print(models_list)
 
 
 @app.get("/", tags=["General"])  # path operation decorator
@@ -84,7 +80,11 @@ def _get_models_list(request: Request):
     """Return the lsit of available models"""
 
     available_models = [
-        {"type": model.type, "parameters": model.params, "accuracy": model.metrics}
+        {
+            "type": model["type"],
+            "parameters": model["params"],
+            "accuracy": model["metrics"],
+        }
         for model in models_list
     ]
 
@@ -113,11 +113,11 @@ def _predict(request: Request, type: str, payload: PredictPayload):
         ]
     ]
 
-    model_wrapper = next((m for m in models_list if m.type == type), None)
+    model_wrapper = next((m for m in models_list if m["type"] == type), None)
 
     if model_wrapper:
 
-        prediction = model_wrapper.model.predict(features)
+        prediction = model_wrapper["model"].predict(features)
         prediction = int(prediction[0])
         predicted_type = IrisType(prediction).name
 
@@ -125,7 +125,7 @@ def _predict(request: Request, type: str, payload: PredictPayload):
             "message": HTTPStatus.OK.phrase,
             "status-code": HTTPStatus.OK,
             "data": {
-                "model-type": model_wrapper.type,
+                "model-type": model_wrapper["type"],
                 "features": {
                     "sepal_length": payload.sepal_length,
                     "sepal_width": payload.sepal_width,

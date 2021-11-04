@@ -14,19 +14,7 @@ from sklearn.svm import SVC
 
 MODELS_DIR = Path("models/")
 
-
-class Model:
-    """Wraps a model"""
-
-    def __init__(self, type: str, params: dict, model, metrics: dict) -> None:
-        self.type = type
-        self.params = params
-        self.model = model
-        self.metrics = metrics
-
-
-# Model = namedtuple("Model", ["type", "params", "model", "metrics"])
-model_list: List[Model] = []
+model_list: List[dict] = []
 
 # Load data
 Iris_data = load_iris()
@@ -62,11 +50,16 @@ LR_accuracies = cross_val_score(estimator=LR_model, X=Xtrain, y=Ytrain, cv=10)
 LR_metrics = {"accuracy": LR_accuracies.mean()}
 
 # Wrap the trained model in a Model namedtuple and append it to the model list
-LR_model_wrap = Model("LogisticRegression", LR_parameters, LR_model, LR_metrics)
-model_list.append(LR_model_wrap)
+LR_model_dict = {
+    "type": "LogisticRegression",
+    "params": LR_parameters,
+    "model": LR_model,
+    "metrics": LR_metrics,
+}
+model_list.append(LR_model_dict)
 
 print("Logistic regression model created.")
-print(LR_model_wrap, end="\n\n\n")
+print(LR_model_dict, end="\n\n\n")
 
 
 # =============================== #
@@ -88,11 +81,17 @@ SVC_accuracies = cross_val_score(estimator=SVC_model, X=Xtrain, y=Ytrain, cv=10)
 SVC_metrics = {"accuracy": SVC_accuracies.mean()}
 
 # Wrap the trained model in a Model namedtuple and append it to the model list
-SVC_model_wrap = Model("SVC", SVC_parameters, SVC_model, SVC_metrics)
-model_list.append(SVC_model_wrap)
+SVC_model_dict = {
+    "type": "SVC",
+    "params": SVC_parameters,
+    "model": SVC_model,
+    "metrics": SVC_metrics,
+}
+
+model_list.append(SVC_model_dict)
 
 print("SVC model created.")
-print(SVC_model_wrap, end="\n\n\n")
+print(SVC_model_dict, end="\n\n\n")
 
 
 # ============= #
@@ -103,7 +102,7 @@ print("Serializing model wrappers...")
 
 for wrapped_model in model_list:
 
-    pkl_filename = f"{wrapped_model.type}_model.pkl"
+    pkl_filename = f"{wrapped_model['type']}_model.pkl"
     pkl_path = MODELS_DIR / pkl_filename
 
     with open(pkl_path, "wb") as file:
