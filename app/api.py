@@ -1,15 +1,19 @@
 """Main script: it includes our API initialization and endpoints."""
 
+import pickle
+
+from typing import Dict
 from functools import wraps
 from datetime import datetime
 from http import HTTPStatus
 from fastapi import FastAPI, Request
+from app.schemas import PredictPayload, IrisType
 
 
 # Define application
 app = FastAPI(
-    title="Housing Prices Regressor",
-    description="Predicts the sale price of a house given the array of its numeric features.",
+    title="Yet another Iris example",
+    description="Making predictions on the Iris dataset using logistic regression.",
     version="0.1",
 )
 
@@ -40,9 +44,12 @@ def construct_response(f):
 
 
 @app.on_event("startup")
-def load_artifacts():
+def load_model():
     global model
-    pass
+
+    Pkl_Filename = "models/Pickle_RL_Model.pkl"
+    with open(Pkl_Filename, "rb") as file:
+        model = pickle.load(file)
 
 
 @app.get("/", tags=["General"])  # path operation decorator
@@ -53,5 +60,42 @@ def _index(request: Request):
         "message": HTTPStatus.OK.phrase,
         "status-code": HTTPStatus.OK,
         "data": {},
+    }
+    return response
+
+
+@app.post("/predict", tags=["Prediction"])
+@construct_response
+def _predict(request: Request, payload: PredictPayload):
+    """Predicts sale price for a house given its numerical features."""
+
+    # sklearn's `predict()` methods expect a 2D array of shape [n_samples, n_features]
+    # therefore, we need to convert our single data point into a 2D array
+    features = [
+        [
+            payload.sepal_length,
+            payload.sepal_width,
+            payload.petal_length,
+            payload.petal_width,
+        ]
+    ]
+
+    prediction = model.predict(features)
+    prediction = int(prediction[0])
+    predicted_type = IrisType(prediction).name
+
+    response = {
+        "message": HTTPStatus.OK.phrase,
+        "status-code": HTTPStatus.OK,
+        "data": {
+            "features": {
+                "sepal_length": payload.sepal_length,
+                "sepal_width": payload.sepal_width,
+                "petal_length": payload.petal_length,
+                "petal_width": payload.petal_width,
+            },
+            "prediction": prediction,
+            "predicted_type": predicted_type,
+        },
     }
     return response

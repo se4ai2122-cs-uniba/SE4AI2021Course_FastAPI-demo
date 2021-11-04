@@ -65,5 +65,5 @@ We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our doc
   - FastAPI (`pip install "fastapi[all]"`)
     (this also installs `uvicorn`, which we'll be using as a server);
 - Copy the basic snippets from the [MadeWithML tutorial](https://madewithml.com/courses/mlops/api/) and make sure that it all works.
-
-
+- Produce/import a pickled model
+- Use the model to predict the target variable
