@@ -1,7 +1,5 @@
 """Sample training script"""
 
-# Import Required packages
-
 import pickle
 from collections import namedtuple
 from pathlib import Path
@@ -12,9 +10,14 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.svm import SVC
 
-MODELS_DIR = Path("models/")
 
-model_list: List[dict] = []
+MODELS_DIR = Path("models/")
+model_wrappers_list: List[dict] = []
+
+
+# ================ #
+# Data preparation #
+# ================ #
 
 # Load data
 Iris_data = load_iris()
@@ -24,6 +27,7 @@ Xtrain, Xtest, Ytrain, Ytest = train_test_split(
     Iris_data.data, Iris_data.target, test_size=0.3, random_state=4
 )
 
+
 # ================== #
 # LogisticRegression #
 # ================== #
@@ -31,7 +35,6 @@ Xtrain, Xtest, Ytrain, Ytest = train_test_split(
 print("Creating logistic regression model...")
 
 # Define the Logistic Regression model
-
 LR_parameters = {
     "C": 0.1,
     "max_iter": 20,
@@ -39,7 +42,6 @@ LR_parameters = {
     "solver": "liblinear",
     "random_state": 0,
 }
-
 LR_model = LogisticRegression(**LR_parameters)
 
 # Train the Model
@@ -56,7 +58,7 @@ LR_model_dict = {
     "model": LR_model,
     "metrics": LR_metrics,
 }
-model_list.append(LR_model_dict)
+model_wrappers_list.append(LR_model_dict)
 
 print("Logistic regression model created.")
 print(LR_model_dict, end="\n\n\n")
@@ -88,7 +90,7 @@ SVC_model_dict = {
     "metrics": SVC_metrics,
 }
 
-model_list.append(SVC_model_dict)
+model_wrappers_list.append(SVC_model_dict)
 
 print("SVC model created.")
 print(SVC_model_dict, end="\n\n\n")
@@ -100,7 +102,7 @@ print(SVC_model_dict, end="\n\n\n")
 
 print("Serializing model wrappers...")
 
-for wrapped_model in model_list:
+for wrapped_model in model_wrappers_list:
 
     pkl_filename = f"{wrapped_model['type']}_model.pkl"
     pkl_path = MODELS_DIR / pkl_filename
