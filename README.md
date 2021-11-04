@@ -58,7 +58,7 @@ We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our doc
   "sepal_length": 6.4,
   "sepal_width": 2.8,
   "petal_length": 5.6,
-  "petal_width": 2.1,
+  "petal_width": 2.1
 }
 ```
 
@@ -69,7 +69,7 @@ We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our doc
   "sepal_length": 5.7,
   "sepal_width": 3.8,
   "petal_length": 1.7,
-  "petal_width": 0.3,
+  "petal_width": 0.3
 }
 ```
 
