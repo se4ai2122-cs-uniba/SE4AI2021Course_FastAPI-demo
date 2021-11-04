@@ -48,7 +48,32 @@ We can now test that the application is working:
 
 We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our documentation by going to the `/docs` endpoint. Alternatively, the documentation generated via [Redoc](https://github.com/Redocly/redoc) is accessible at the `/redoc` endpoint.
 
-## Step by step guide
+
+## Try the API
+
+### Virginica (2)
+
+```json
+{
+  "sepal_length": 6.4,
+  "sepal_width": 2.8,
+  "petal_length": 5.6,
+  "petal_width": 2.1,
+}
+```
+
+### Setosa (0)
+
+```json
+{
+  "sepal_length": 5.7,
+  "sepal_width": 3.8,
+  "petal_length": 1.7,
+  "petal_width": 0.3,
+}
+```
+
+## Step by step guide to rebuild this repo
 
 - Basic repo setup
     - .gitignore
@@ -58,7 +83,7 @@ We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our doc
   models/
   app/
   ├── api.py          - FastAPI app
-  ├── gunicorn.py     - WSGI script
+  ├── gunicorn.py     - WSGI script (???)
   └── schemas.py      - API model schemas
   ```
 - Install the dependencies
