@@ -1,14 +1,18 @@
 """Main script: it includes our API initialization and endpoints."""
 
 import pickle
-
-from typing import Dict
-from functools import wraps
 from datetime import datetime
+from functools import wraps
 from http import HTTPStatus
-from fastapi import FastAPI, Request
-from app.schemas import PredictPayload, IrisType
+from pathlib import Path
+from typing import Dict, List
 
+from fastapi import FastAPI, Request
+
+from app.schemas import IrisType, Model, PredictPayload
+
+MODELS_DIR = Path("models/")
+models_list: List[Model] = []
 
 # Define application
 app = FastAPI(
@@ -44,29 +48,58 @@ def construct_response(f):
 
 
 @app.on_event("startup")
-def load_model():
-    global model
+def _load_models():
+    """Loads all pickled models found in `MODELS_DIR` and adds them to `models_list`"""
 
-    Pkl_Filename = "models/Pickle_RL_Model.pkl"
-    with open(Pkl_Filename, "rb") as file:
-        model = pickle.load(file)
+    model_paths = [
+        filename for filename in MODELS_DIR.iterdir() if filename.suffix == ".pkl"
+    ]
+
+    print(model_paths)
+    for path in model_paths:
+        with open(path, "rb") as file:
+            model = pickle.load(file)
+            models_list.append(model)
+
+    print("MODELS LIST")
+    print(models_list)
 
 
 @app.get("/", tags=["General"])  # path operation decorator
 @construct_response
 def _index(request: Request):
     """Health check."""
+
     response = {
         "message": HTTPStatus.OK.phrase,
         "status-code": HTTPStatus.OK,
-        "data": {},
+        "data": {"message": "Welcome to IRIS classifier!"},
     }
     return response
 
 
-@app.post("/predict", tags=["Prediction"])
+@app.get("/models", tags=["Prediction"])
 @construct_response
-def _predict(request: Request, payload: PredictPayload):
+def _get_models_list(request: Request):
+    """Return the lsit of available models"""
+
+    available_models = [
+        {"type": model.type, "parameters": model.params, "accuracy": model.metrics}
+        for model in models_list
+    ]
+
+    response = {
+        "message": HTTPStatus.OK.phrase,
+        "status-code": HTTPStatus.OK,
+        "data": available_models,
+    }
+
+    return response
+
+
+@app.post("/models/{type}", tags=["Prediction"])
+@construct_response
+def _predict(request: Request, type: str, payload: PredictPayload):
     """Predicts sale price for a house given its numerical features."""
 
     # sklearn's `predict()` methods expect a 2D array of shape [n_samples, n_features]
@@ -80,22 +113,32 @@ def _predict(request: Request, payload: PredictPayload):
         ]
     ]
 
-    prediction = model.predict(features)
-    prediction = int(prediction[0])
-    predicted_type = IrisType(prediction).name
+    model_wrapper = next((m for m in models_list if m.type == type), None)
 
-    response = {
-        "message": HTTPStatus.OK.phrase,
-        "status-code": HTTPStatus.OK,
-        "data": {
-            "features": {
-                "sepal_length": payload.sepal_length,
-                "sepal_width": payload.sepal_width,
-                "petal_length": payload.petal_length,
-                "petal_width": payload.petal_width,
+    if model_wrapper:
+
+        prediction = model_wrapper.model.predict(features)
+        prediction = int(prediction[0])
+        predicted_type = IrisType(prediction).name
+
+        response = {
+            "message": HTTPStatus.OK.phrase,
+            "status-code": HTTPStatus.OK,
+            "data": {
+                "model-type": model_wrapper.type,
+                "features": {
+                    "sepal_length": payload.sepal_length,
+                    "sepal_width": payload.sepal_width,
+                    "petal_length": payload.petal_length,
+                    "petal_width": payload.petal_width,
+                },
+                "prediction": prediction,
+                "predicted_type": predicted_type,
             },
-            "prediction": prediction,
-            "predicted_type": predicted_type,
-        },
-    }
+        }
+    else:
+        response = {
+            "message": "Model not found",
+            "status-code": HTTPStatus.BAD_REQUEST,
+        }
     return response
