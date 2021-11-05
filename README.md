@@ -1,10 +1,20 @@
 # FastAPI Lab
 
-Reference tutorial: [APIs for Machine Learning - Made with ML](https://madewithml.com/courses/mlops/api/)
+This is a demo project used to show how to serve ML models with FastAPI in the 2021 edition of the Software Engineering for AI-enabled Systems course (University of Bari, Italy - Dept. of Computer Science).
 
-## How to launch the server
+The scripts in this project are freely inspired by the [Made with ML](https://madewithml.com) tutorial: "[APIs for Machine Learning](https://madewithml.com/courses/mlops/api/)".
 
-We'll be using Uvicorn, a fast ASGI server (it can run asynchronous code in a single process) to launch our application. Use the following command to start the server
+## Project setup
+
+Install all project requirements with `pip`:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Launch the server
+
+We'll be using Uvicorn, a fast ASGI server (it can run asynchronous code in a single process) to launch our application. Use the following command to start the server:
 
 ```bash
 uvicorn app.api:app \
@@ -15,25 +25,28 @@ uvicorn app.api:app \
     --reload-dir models
 ```
 
-where:
+In detail:
 
 - `uvicorn app.api:app` is the location of app (`app` directory > `api.py` script > `app` object);
 - `--reload` makes the server reload every time we update;
 - `--reload-dir app` makes it only reload on updates to the `app/` directory;
 - `--reload-dir models` makes it also reload on updates to the `models/` directory;
 
-**Observation**. If we want to manage multiple uvicorn workers to enable parallelism in our application, we can use Gunicorn in conjunction with Uvicorn.
+**Observation**. If we want to manage multiple `uvicorn` workers to enable parallelism in our application, we can use **Gunicorn** in conjunction with **Uvicorn**.
 
----
+## Try the API
 
-We can now test that the application is working:
+We can now test that the application is working. These are some of the possibilities:
 
-- visit [localhost:5000](http://localhost:5000/) in the browser;
+- visit [localhost:5000](http://localhost:5000/)
 - use `curl`
-  ```
+
+  ```bash
   curl -X GET http://localhost:5000/
   ```
-- access the endpoint via code. E.g.,
+
+- access the API programmatically, e.g.:
+
   ```python
   import json
   import requests
@@ -41,17 +54,16 @@ We can now test that the application is working:
   response = requests.get("http://localhost:5000/")
   print (json.loads(response.text))
   ```
-- use an external tool like [Postman](https://www.postman.com), which lets you execute and manage tests that can be saved and shared with others.
 
+- use an external tool like [Postman](https://www.postman.com), which lets you execute and manage tests that can be saved and shared with others.
 
 ### Accessing the documentation
 
 We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our documentation by going to the `/docs` endpoint. Alternatively, the documentation generated via [Redoc](https://github.com/Redocly/redoc) is accessible at the `/redoc` endpoint.
 
+### Requests to try
 
-## Try the API
-
-### Virginica (2)
+#### Virginica (2)
 
 ```json
 {
@@ -62,7 +74,7 @@ We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our doc
 }
 ```
 
-### Setosa (0)
+#### Setosa (0)
 
 ```json
 {
@@ -72,23 +84,3 @@ We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our doc
   "petal_width": 0.3
 }
 ```
-
-## Step by step guide to rebuild this repo
-
-- Basic repo setup
-    - .gitignore
-    - git init and first commit
-- Create the repo structure
-  ```
-  models/
-  app/
-  ├── api.py          - FastAPI app
-  ├── gunicorn.py     - WSGI script (???)
-  └── schemas.py      - API model schemas
-  ```
-- Install the dependencies
-  - FastAPI (`pip install "fastapi[all]"`)
-    (this also installs `uvicorn`, which we'll be using as a server);
-- Copy the basic snippets from the [MadeWithML tutorial](https://madewithml.com/courses/mlops/api/) and make sure that it all works.
-- Produce/import a pickled model
-- Use the model to predict the target variable
