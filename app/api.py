@@ -7,7 +7,8 @@ from http import HTTPStatus
 from pathlib import Path
 from typing import Dict, List
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
+from app.monitoring import instrumentator
 
 from app.schemas import IrisType, PredictPayload
 
@@ -20,6 +21,7 @@ app = FastAPI(
     description="This API lets you make predictions on the Iris dataset using a couple of simple models.",
     version="0.1",
 )
+instrumentator.instrument(app).expose(app, include_in_schema=False, should_gzip=True)
 
 
 def construct_response(f):
@@ -99,7 +101,7 @@ def _get_models_list(request: Request):
 
 @app.post("/models/{type}", tags=["Prediction"])
 @construct_response
-def _predict(request: Request, type: str, payload: PredictPayload):
+def _predict(request: Request, response: Response, type: str, payload: PredictPayload):
     """Classifies Iris flowers based on sepal and petal sizes."""
 
     # sklearn's `predict()` methods expect a 2D array of shape [n_samples, n_features]
@@ -121,7 +123,7 @@ def _predict(request: Request, type: str, payload: PredictPayload):
         prediction = int(prediction[0])
         predicted_type = IrisType(prediction).name
 
-        response = {
+        response_payload = {
             "message": HTTPStatus.OK.phrase,
             "status-code": HTTPStatus.OK,
             "data": {
@@ -136,9 +138,10 @@ def _predict(request: Request, type: str, payload: PredictPayload):
                 "predicted_type": predicted_type,
             },
         }
+        response.headers["X-model-prediction"] = str(prediction)
     else:
-        response = {
+        response_payload = {
             "message": "Model not found",
             "status-code": HTTPStatus.BAD_REQUEST,
         }
-    return response
+    return response_payload
