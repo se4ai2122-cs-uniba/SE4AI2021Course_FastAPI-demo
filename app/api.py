@@ -138,6 +138,7 @@ def _predict(request: Request, response: Response, type: str, payload: PredictPa
                 "predicted_type": predicted_type,
             },
         }
+        response.headers["X-model-type"] = type
         response.headers["X-model-prediction"] = str(prediction)
     else:
         response_payload = {

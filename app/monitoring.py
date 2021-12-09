@@ -28,18 +28,22 @@ def model_output(
     METRIC = Histogram(
         metric_name,
         metric_doc,
+        labelnames=["model_type"],
         buckets=buckets,
         namespace=metric_namespace,
         subsystem=metric_subsystem,
     )
+    METRIC.labels("SVC")
+    METRIC.labels("LogisticRegression")
 
     def instrumentation(info: Info) -> None:
         if info.modified_handler == "/models/{type}":
             predicted_flower_type = info.response.headers.get("X-model-prediction")
+            model_type = info.response.headers.get("X-model-type")
             print(info.response)
             if predicted_flower_type:
                 print(predicted_flower_type)
-                METRIC.observe(float(predicted_flower_type))
+                METRIC.labels(model_type).observe(float(predicted_flower_type))
 
     return instrumentation
 
