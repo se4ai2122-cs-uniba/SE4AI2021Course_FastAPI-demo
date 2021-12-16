@@ -9,9 +9,9 @@ from typing import List
 
 from fastapi import FastAPI, Request
 
-from schemas import IrisType, PredictPayload
+from app.schemas import IrisType, PredictPayload
 
-MODELS_DIR = Path("../models/")
+MODELS_DIR = Path("models/")
 model_wrappers_list: List[dict] = []
 
 # Define application
