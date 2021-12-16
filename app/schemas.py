@@ -1,6 +1,5 @@
 """Definitions for the objects used by our resource endpoints."""
 
-from collections import namedtuple
 from enum import Enum
 
 from pydantic import BaseModel
@@ -24,6 +23,6 @@ class PredictPayload(BaseModel):
 
 
 class IrisType(Enum):
-    setosa = 0
-    versicolor = 1
-    virginica = 2
+    SETOSA = 0
+    VERSICOLOR = 1
+    VIRGINICA = 2

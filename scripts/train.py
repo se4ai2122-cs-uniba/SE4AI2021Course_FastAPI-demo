@@ -1,7 +1,6 @@
 """Sample training script"""
 
 import pickle
-from collections import namedtuple
 from pathlib import Path
 from typing import List
 
@@ -24,9 +23,11 @@ Iris_data = load_iris()
 
 # Split data
 Xtrain, Xtest, Ytrain, Ytest = train_test_split(
-    Iris_data.data, Iris_data.target, test_size=0.3, random_state=4
+    Iris_data.data,  # pylint: disable=no-member
+    Iris_data.target,  # pylint: disable=no-member
+    test_size=0.3,
+    random_state=4,
 )
-
 
 # ================== #
 # LogisticRegression #

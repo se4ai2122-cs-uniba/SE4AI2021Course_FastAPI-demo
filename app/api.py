@@ -5,7 +5,7 @@ from datetime import datetime
 from functools import wraps
 from http import HTTPStatus
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 
 from fastapi import FastAPI, Request
 
@@ -17,7 +17,8 @@ model_wrappers_list: List[dict] = []
 # Define application
 app = FastAPI(
     title="Yet another Iris example",
-    description="This API lets you make predictions on the Iris dataset using a couple of simple models.",
+    description="This API lets you make predictions on the Iris dataset using a couple\
+        of simple models.",
     version="0.1",
 )
 
@@ -35,7 +36,7 @@ def construct_response(f):
             "method": request.method,
             "status-code": results["status-code"],
             "timestamp": datetime.now().isoformat(),
-            "url": request.url._url,
+            "url": request.url._url,  # pylint: disable=protected-access
         }
 
         # Add data
