@@ -21,14 +21,15 @@ app = FastAPI(
         of simple models.",
     version="0.1",
 )
+# pylint: disable=unused-argument
 
 
-def construct_response(f):
+def construct_response(wrapped_func):
     """Construct a JSON response for an endpoint's results."""
 
-    @wraps(f)
+    @wraps(wrapped_func)
     def wrap(request: Request, *args, **kwargs):
-        results = f(request, *args, **kwargs)
+        results = wrapped_func(request, *args, **kwargs)
 
         # Construct response
         response = {
@@ -100,7 +101,7 @@ def _get_models_list(request: Request):
 
 @app.post("/models/{type}", tags=["Prediction"])
 @construct_response
-def _predict(request: Request, type: str, payload: PredictPayload):
+def _predict(request: Request, model_type: str, payload: PredictPayload):
     """Classifies Iris flowers based on sepal and petal sizes."""
 
     # sklearn's `predict()` methods expect a 2D array of shape [n_samples, n_features]
@@ -114,7 +115,9 @@ def _predict(request: Request, type: str, payload: PredictPayload):
         ]
     ]
 
-    model_wrapper = next((m for m in model_wrappers_list if m["type"] == type), None)
+    model_wrapper = next(
+        (m for m in model_wrappers_list if m["type"] == model_type), None
+    )
 
     if model_wrapper:
 
