@@ -1,3 +1,2 @@
 [MASTER]
 extension-pkg-whitelist=pydantic
-init-hook='import sys; sys.path.append("./")'

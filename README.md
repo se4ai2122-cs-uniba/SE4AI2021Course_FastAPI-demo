@@ -14,15 +14,13 @@ pip install -r requirements.txt
 
 ## Launch the server
 
-We'll be using Uvicorn, a fast ASGI server (it can run asynchronous code in a single process) to launch our application. Use the following command to start the server:
+We'll be using Uvicorn, a fast ASGI server (it can run asynchronous code in a single process) to launch our application. `cd` to the `app/` directory and use the following command to start the server:
 
 ```bash
-uvicorn app.api:app \
+uvicorn api:app \
     --host 0.0.0.0 \
     --port 5000 \
-    --reload \
-    --reload-dir app \
-    --reload-dir models
+    --reload
 ```
 
 In detail:
