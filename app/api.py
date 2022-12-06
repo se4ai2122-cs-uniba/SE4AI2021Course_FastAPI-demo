@@ -25,7 +25,7 @@ app = FastAPI(
 
 
 def construct_response(wrapped_func):
-    """Construct a json response for an endpoint's results."""
+    """Construct a JSON response for an endpoint's results."""
 
     @wraps(wrapped_func)
     def wrap(request: Request, *args, **kwargs):
