@@ -1,6 +1,5 @@
-name: quality_assurance_workflow
+name: api_testing_workflow
 
-the workflow if the commit message contains the word "model"
 on:
   push:
     paths:
