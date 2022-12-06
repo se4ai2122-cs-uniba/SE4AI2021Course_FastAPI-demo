@@ -19,7 +19,7 @@ jobs:
           pip install -r ./requirements.txt
       - name: Analyze code with pylint
         run: |
-          pylint scripts/ app/
+          pylint --fail-under=7 scripts/ app/
 
   # data-quality-assurance:
   #   name: Data quality assurance
