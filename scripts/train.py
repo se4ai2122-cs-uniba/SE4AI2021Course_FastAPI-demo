@@ -49,7 +49,7 @@ def train_log_reg_model(Xtrain, Ytrain):
     # Define the Logistic Regression model
     LR_parameters = {
         "C": 0.1,
-        "max_iter": 20,
+        "max_iter": 21,
         "fit_intercept": True,
         "solver": "liblinear",
         "random_state": 0,
