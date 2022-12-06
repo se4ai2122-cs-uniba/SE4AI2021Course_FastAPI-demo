@@ -1,0 +1,23 @@
+name: model_training_workflow
+
+# Trigger the workflow if the commit message contains the word "model"
+on:
+  push:
+    paths:
+      - 'scripts/**'
+
+jobs:
+  model-training:
+    name: Model training
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Train models
+        run: python scripts/train.py
+      - name: Upload model artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: models
+          path: |
+            ./models/
