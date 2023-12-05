@@ -31,11 +31,11 @@ pyflakes==2.4.0
 pylint==2.11.1
 python-dotenv==0.19.1
 python-multipart==0.0.5
-PyYAML==5.4.1
+PyYAML>=5.4.1
 regex==2021.11.2
 requests==2.26.0
-scikit-learn==1.0.1
-scipy==1.7.1
+scikit-learn>=1.0.1
+scipy>=1.7.1
 six==1.16.0
 sniffio==1.2.0
 starlette==0.16.0
