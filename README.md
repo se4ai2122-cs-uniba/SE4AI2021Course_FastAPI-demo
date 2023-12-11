@@ -84,3 +84,41 @@ We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our doc
   "petal_width": 0.3
 }
 ```
+
+## Monitoring with Prometheus and Grafana
+
+The easist way to setup a Prometheus server is by launching the official Prometheus Docker container:
+
+```bash
+docker run \
+  --name=prometheus \
+  -p 9090:9090 \
+  -v <absolute_path_to_prometheus.yml>:/etc/prometheus/prometheus.yml \
+  prom/prometheus
+```
+
+With the `-v` option we bind mount the Prometheus config file (`prometheus.yml`) from the host.
+Your new container will start serving Prometheus at <http://localhost:9090>.
+
+Next, we can run the official Grafana Docker container:
+
+```bash
+docker run \
+  --name=grafana \
+  -p 3000:3000 \
+  grafana/grafana-enterprise
+```
+
+Once we are logged into Grafana (default credentials: {**usr**: `admin`, **pwd**: `admin`}), we can configure Prometheus as a _data source_.
+
+**Observation**. Grafana will need to connect to the Prometheus container which – thanks to Docker's port forwarding mechanism – is available on the host machine at `localhost:9090`. By default though, containers run in their own network, so Grafana will not be able to access Prometheus at its `localhost:9090` (the `localhost` of the Grafana container is different from that of the host machine). Nevertheless, within a Docker container, `host.docker.internal` resolves to the host's `localhost`. So, to set up the Grafana datasource, use:
+
+```bash
+http://host.docker.internal:9090
+```
+
+instead of
+
+```bash
+http://localhost:9090
+```
