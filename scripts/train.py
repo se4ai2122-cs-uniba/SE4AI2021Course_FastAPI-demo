@@ -9,7 +9,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.svm import SVC
 
-
 MODELS_DIR = Path("models/")
 model_wrappers_list: List[dict] = []
 
@@ -50,7 +49,7 @@ LR_model.fit(Xtrain, Ytrain)
 LR_accuracies = cross_val_score(estimator=LR_model, X=Xtrain, y=Ytrain, cv=10)
 LR_metrics = {"accuracy": LR_accuracies.mean()}
 
-# Wrap the trained model in a Model namedtuple and append it to the model list
+# Wrap the trained model in a dictionary and append it to the model list
 LR_model_dict = {
     "type": "LogisticRegression",
     "params": LR_parameters,
@@ -81,7 +80,7 @@ SVC_model.fit(Xtrain, Ytrain)
 SVC_accuracies = cross_val_score(estimator=SVC_model, X=Xtrain, y=Ytrain, cv=10)
 SVC_metrics = {"accuracy": SVC_accuracies.mean()}
 
-# Wrap the trained model in a Model namedtuple and append it to the model list
+# Wrap the trained model in a dictionary and append it to the model list
 SVC_model_dict = {
     "type": "SVC",
     "params": SVC_parameters,
