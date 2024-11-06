@@ -1,7 +1,6 @@
 """Sample training script"""
 
 import pickle
-from collections import namedtuple
 from pathlib import Path
 from typing import List
 

@@ -1,6 +1,5 @@
 """Definitions for the objects used by our resource endpoints."""
 
-from collections import namedtuple
 from enum import Enum
 
 from pydantic import BaseModel
