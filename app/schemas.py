@@ -1,6 +1,5 @@
 """Definitions for the objects used by our resource endpoints."""
 
-from collections import namedtuple
 from enum import Enum
 
 from pydantic import BaseModel
@@ -13,7 +12,8 @@ class PredictPayload(BaseModel):
     petal_width: float
 
     class Config:
-        schema_extra = {
+        # The json_schema_extra option can be used to add extra information to the JSON schema
+        json_schema_extra = {
             "example": {
                 "sepal_length": 6.4,
                 "sepal_width": 2.8,
