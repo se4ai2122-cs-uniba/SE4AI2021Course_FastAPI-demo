@@ -77,7 +77,7 @@ def _index(request: Request):
 @app.get("/models", tags=["Prediction"])
 @construct_response
 def _get_models_list(request: Request):
-    """Return the lsit of available models"""
+    """Return the list of available models"""
 
     available_models = [
         {
