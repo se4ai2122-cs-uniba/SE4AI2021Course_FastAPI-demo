@@ -22,7 +22,10 @@ Iris_data = load_iris()
 
 # Split data
 Xtrain, Xtest, Ytrain, Ytest = train_test_split(
-    Iris_data.data, Iris_data.target, test_size=0.3, random_state=4
+    Iris_data.data,  # type: ignore
+    Iris_data.target,  # type: ignore
+    test_size=0.3,
+    random_state=4,  # type: ignore
 )
 
 
@@ -101,7 +104,6 @@ print(SVC_model_dict, end="\n\n\n")
 print("Serializing model wrappers...")
 
 for wrapped_model in model_wrappers_list:
-
     pkl_filename = f"{wrapped_model['type']}_model.pkl"
     pkl_path = MODELS_DIR / pkl_filename
 
