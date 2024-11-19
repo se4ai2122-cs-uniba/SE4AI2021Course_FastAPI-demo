@@ -7,7 +7,6 @@ def test_root_endpoint():
     """Test the root endpoint."""
 
     with TestClient(app) as client:
-
         response = client.get("/")
 
         assert response.status_code == 200
@@ -22,7 +21,6 @@ def test_logreg_model_endpoint():
     """Test the logreg model endpoint."""
 
     with TestClient(app) as client:
-
         response = client.post(
             "/models/LogisticRegression",
             headers={"Content-Type": "application/json", "accept": "application/json"},
@@ -34,5 +32,4 @@ def test_logreg_model_endpoint():
             },
         )
         assert response.status_code == 200
-        print(response.json())
         assert response.json()["data"]["predicted_type"] == "virginica"
