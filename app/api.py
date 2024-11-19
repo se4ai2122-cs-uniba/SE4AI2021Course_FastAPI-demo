@@ -1,6 +1,7 @@
 """Main script: it includes our API initialization and endpoints."""
 
 import pickle
+from contextlib import asynccontextmanager
 from datetime import datetime
 from functools import wraps
 from http import HTTPStatus
@@ -14,11 +15,36 @@ from app.schemas import IrisType, PredictPayload
 MODELS_DIR = Path("models/")
 model_wrappers_list: List[dict] = []
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Context manager to handle application lifespan events.
+
+    Used to load all pickled models found in `MODELS_DIR` and add them to `models_list`
+    """
+
+    # Load all models
+    model_paths = [
+        filename for filename in MODELS_DIR.iterdir() if filename.suffix == ".pkl"
+    ]
+
+    for path in model_paths:
+        with open(path, "rb") as file:
+            model_wrapper = pickle.load(file)
+            model_wrappers_list.append(model_wrapper)
+
+    yield
+
+    # Clean up the models list
+    model_wrappers_list.clear()
+
+
 # Define application
 app = FastAPI(
     title="Yet another Iris example",
     description="This API lets you make predictions on the Iris dataset using a couple of simple models.",
     version="0.1",
+    lifespan=lifespan,
 )
 
 
@@ -47,20 +73,6 @@ def construct_response(f):
     return wrap
 
 
-@app.on_event("startup")
-def _load_models():
-    """Loads all pickled models found in `MODELS_DIR` and adds them to `models_list`"""
-
-    model_paths = [
-        filename for filename in MODELS_DIR.iterdir() if filename.suffix == ".pkl"
-    ]
-
-    for path in model_paths:
-        with open(path, "rb") as file:
-            model_wrapper = pickle.load(file)
-            model_wrappers_list.append(model_wrapper)
-
-
 @app.get("/", tags=["General"])  # path operation decorator
 @construct_response
 def _index(request: Request):
@@ -77,7 +89,7 @@ def _index(request: Request):
 @app.get("/models", tags=["Prediction"])
 @construct_response
 def _get_models_list(request: Request):
-    """Return the lsit of available models"""
+    """Return the list of available models"""
 
     available_models = [
         {
@@ -116,7 +128,6 @@ def _predict(request: Request, type: str, payload: PredictPayload):
     model_wrapper = next((m for m in model_wrappers_list if m["type"] == type), None)
 
     if model_wrapper:
-
         prediction = model_wrapper["model"].predict(features)
         prediction = int(prediction[0])
         predicted_type = IrisType(prediction).name
