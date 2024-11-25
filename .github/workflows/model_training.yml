@@ -1,6 +1,5 @@
 name: model_training_workflow
 
-# Trigger the workflow if the commit message contains the word "model"
 on:
   push:
     paths:
