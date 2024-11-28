@@ -4,6 +4,7 @@ import pickle
 from pathlib import Path
 from typing import List
 
+from codecarbon import EmissionsTracker
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, train_test_split
@@ -11,6 +12,7 @@ from sklearn.svm import SVC
 
 MODELS_DIR = Path("models/")
 model_wrappers_list: List[dict] = []
+tracker = EmissionsTracker(project_name="IrisClassifier")
 
 
 # ================ #
@@ -43,7 +45,9 @@ LR_parameters = {
 LR_model = LogisticRegression(**LR_parameters)
 
 # Train the Model
+tracker.start_task("Train Logistic Regression model")
 LR_model.fit(Xtrain, Ytrain)
+logistic_regression_emissions = tracker.stop_task()
 
 # Evaluate model accuracy by cross-validation
 LR_accuracies = cross_val_score(estimator=LR_model, X=Xtrain, y=Ytrain, cv=10)
@@ -74,7 +78,9 @@ SVC_parameters = {"kernel": "linear", "random_state": 0}
 SVC_model = SVC(**SVC_parameters)
 
 # Train the Model
+tracker.start_task("Train SVC model")
 SVC_model.fit(Xtrain, Ytrain)
+svc_emissions = tracker.stop_task()
 
 # Evaluate model accuracy by cross-validation
 SVC_accuracies = cross_val_score(estimator=SVC_model, X=Xtrain, y=Ytrain, cv=10)
@@ -93,6 +99,7 @@ model_wrappers_list.append(SVC_model_dict)
 print("SVC model created.")
 print(SVC_model_dict, end="\n\n\n")
 
+tracker.stop()
 
 # ============= #
 # Serialization #
@@ -101,7 +108,6 @@ print(SVC_model_dict, end="\n\n\n")
 print("Serializing model wrappers...")
 
 for wrapped_model in model_wrappers_list:
-
     pkl_filename = f"{wrapped_model['type']}_model.pkl"
     pkl_path = MODELS_DIR / pkl_filename
 
