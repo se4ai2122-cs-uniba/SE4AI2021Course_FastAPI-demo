@@ -5,6 +5,7 @@ from prometheus_client import Histogram
 from prometheus_fastapi_instrumentator import Instrumentator, metrics
 from prometheus_fastapi_instrumentator.metrics import Info
 
+# Let's use environment variables METRICS_NAMESPACE and METRICS_SUBSYSTEM for logical grouping of metrics
 NAMESPACE = os.environ.get("METRICS_NAMESPACE", "fastapi")
 SUBSYSTEM = os.environ.get("METRICS_SUBSYSTEM", "model")
 
@@ -55,6 +56,7 @@ instrumentator.add(
         metric_subsystem=SUBSYSTEM,
     )
 )
+
 
 # ----- custom metrics -----
 def model_output(
