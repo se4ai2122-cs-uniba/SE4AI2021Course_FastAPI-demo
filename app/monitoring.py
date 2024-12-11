@@ -79,8 +79,8 @@ def model_output(
 
     def instrumentation(info: Info) -> None:
         if info.modified_handler == "/models/{type}":
-            predicted_flower_type = info.response.headers.get("X-model-prediction")
-            model_type = info.response.headers.get("X-model-type")
+            predicted_flower_type = info.response.headers.get("X-model-prediction") # type: ignore
+            model_type = info.response.headers.get("X-model-type") # type: ignore
             if predicted_flower_type:
                 METRIC.labels(model_type).observe(float(predicted_flower_type))
 
