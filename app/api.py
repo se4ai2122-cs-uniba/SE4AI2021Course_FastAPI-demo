@@ -8,8 +8,8 @@ from pathlib import Path
 from typing import Dict, List
 
 from fastapi import FastAPI, Request, Response
-from app.monitoring import instrumentator
 
+from app.monitoring import instrumentator
 from app.schemas import IrisType, PredictPayload
 
 MODELS_DIR = Path("models/")
@@ -76,6 +76,14 @@ def _index(request: Request):
     return response
 
 
+@app.get("/health", tags=["General"])
+@construct_response
+def _health():
+    """Health check endpoint."""
+
+    return {"status": "healthy"}
+
+
 @app.get("/models", tags=["Prediction"])
 @construct_response
 def _get_models_list(request: Request):
@@ -118,7 +126,6 @@ def _predict(request: Request, response: Response, type: str, payload: PredictPa
     model_wrapper = next((m for m in model_wrappers_list if m["type"] == type), None)
 
     if model_wrapper:
-
         prediction = model_wrapper["model"].predict(features)
         prediction = int(prediction[0])
         predicted_type = IrisType(prediction).name
