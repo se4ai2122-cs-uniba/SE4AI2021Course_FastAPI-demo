@@ -84,3 +84,15 @@ We can access the [Swagger UI](https://swagger.io/tools/swagger-ui/) for our doc
   "petal_width": 0.3
 }
 ```
+
+## Monitoring with Prometheus and Grafana
+
+We can monitor our application using [Prometheus](https://prometheus.io) and [Grafana](https://grafana.com).
+We can use the `docker-compose.yml` file to start the services:
+
+```bash
+docker compose up -d
+```
+
+Then, we can access the Prometheus dashboard at [localhost:9090](http://localhost:9090) and the Grafana dashboard at [localhost:4444](http://localhost:4444). The default credentials for Grafana are `admin` for the username and `admin_password` for the password.
+Docker compose also starts a locust service that can be accessed at [localhost:8089](http://localhost:8089) to perform load tests on the API.
