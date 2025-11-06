@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class PredictPayload(BaseModel):
@@ -11,9 +11,9 @@ class PredictPayload(BaseModel):
     petal_length: float
     petal_width: float
 
-    class Config:
+    model_config = ConfigDict(
         # The json_schema_extra option can be used to add extra information to the JSON schema
-        json_schema_extra = {
+        json_schema_extra={
             "example": {
                 "sepal_length": 6.4,
                 "sepal_width": 2.8,
@@ -21,6 +21,7 @@ class PredictPayload(BaseModel):
                 "petal_width": 2.1,
             }
         }
+    )
 
 
 class IrisType(Enum):

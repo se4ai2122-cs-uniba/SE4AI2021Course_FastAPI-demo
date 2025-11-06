@@ -1,48 +1,42 @@
 # FastAPI Lab
 
-This is a demo project used to show how to serve ML models with FastAPI in the 2021 edition of the Software Engineering for AI-enabled Systems course (University of Bari, Italy - Dept. of Computer Science).
+This demo project, developed for the Software Engineering for AI-enabled Systems course at the University of Bari (Department of Computer Science), demonstrates how to serve machine learning models using FastAPI.
 
 The scripts in this project are freely inspired by the [Made with ML](https://madewithml.com) tutorial: "[APIs for Machine Learning](https://madewithml.com/courses/mlops/api/)".
 
 ## Project setup
 
-Install all project requirements with `pip`:
+Install all project requirements with `uv`:
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
 
 ## Launch the server
 
-We'll be using Uvicorn, a fast ASGI server (it can run asynchronous code in a single process) to launch our application. Use the following command to start the server:
+Use the FastAPI CLI via `uv` to launch the application in development mode (with auto-reload):
 
 ```bash
-uvicorn app.api:app \
-    --host 0.0.0.0 \
-    --port 5000 \
-    --reload \
-    --reload-dir app \
-    --reload-dir models
+uv run fastapi dev app/api.py
 ```
 
 In detail:
 
-- `uvicorn app.api:app` is the location of app (`app` directory > `api.py` script > `app` object);
-- `--reload` makes the server reload every time we update;
-- `--reload-dir app` makes it only reload on updates to the `app/` directory;
-- `--reload-dir models` makes it also reload on updates to the `models/` directory;
+- `fastapi dev` runs a development server with auto-reload;
+- `app/api.py` is the entrypoint module for the app;
+- You can pass `--host` and `--port` to customize bind address and port (defaults are `127.0.0.1:8000`).
 
-**Observation**. If we want to manage multiple `uvicorn` workers to enable parallelism in our application, we can use **Gunicorn** in conjunction with **Uvicorn**.
+**Observation**. For production, prefer an ASGI server setup (e.g., `uvicorn` or `gunicorn` with multiple `uvicorn` workers). The `fastapi dev` command is intended for development only.
 
 ## Try the API
 
 We can now test that the application is working. These are some of the possibilities:
 
-- visit [localhost:5000](http://localhost:5000/)
+- visit [localhost:8000](http://localhost:8000/)
 - use `curl`
 
   ```bash
-  curl -X GET http://localhost:5000/
+  curl -X GET http://localhost:8000/
   ```
 
 - access the API programmatically, e.g.:
@@ -51,7 +45,7 @@ We can now test that the application is working. These are some of the possibili
   import json
   import requests
 
-  response = requests.get("http://localhost:5000/")
+  response = requests.get("http://localhost:8000/")
   print (json.loads(response.text))
   ```
 
