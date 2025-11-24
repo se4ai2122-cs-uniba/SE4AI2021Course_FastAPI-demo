@@ -1,24 +1,27 @@
-# Set base image
+# SET BASE IMAGE
 FROM python:3.10.15-slim-bookworm
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+# SET ENVIRONMENT VARIABLES
+# Flush stdout/stderr immediately for realtime logs
+ENV PYTHONUNBUFFERED=1
+# Skip .pyc generation to keep the image lean
+ENV PYTHONDONTWRITEBYTECODE=1
+# Disable pip cache to avoid persisting downloaded wheels
+ENV PIP_NO_CACHE_DIR=1
+# Skip pip's version check to speed up installs
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Install dependencies
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
-
-# Set work directory
+# INSTALL DEPENDENCIES
 WORKDIR /fastAPIapp
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the FastAPI project
-COPY . .
+# COPY RUNTIME SOURCES AND MODELS
+COPY app ./app
+COPY models ./models
 
-# Expose port
+# EXPOSE THE APPLICATION PORT
 EXPOSE 55000
 
-# Run the FastAPI application
+# RUN THE FASTAPI APPLICATION
 CMD ["fastapi", "run", "app/api.py", "--port", "55000"]
