@@ -6,14 +6,13 @@ from datetime import datetime
 from functools import wraps
 from http import HTTPStatus
 from pathlib import Path
-from typing import Dict, List
 
 from fastapi import FastAPI, Request
 
 from app.schemas import IrisType, PredictPayload
 
 MODELS_DIR = Path("models/")
-model_wrappers_list: List[dict] = []
+model_wrappers_list: list[dict] = []
 
 
 @asynccontextmanager
@@ -29,7 +28,8 @@ async def lifespan(app: FastAPI):
     ]
 
     for path in model_paths:
-        with open(path, "rb") as file:
+        # Blocking I/O is fine here: it runs once, before the server accepts requests
+        with open(path, "rb") as file:  # noqa: ASYNC230
             model_wrapper = pickle.load(file)
             model_wrappers_list.append(model_wrapper)
 
@@ -61,7 +61,7 @@ def construct_response(f):
             "method": request.method,
             "status-code": results["status-code"],
             "timestamp": datetime.now().isoformat(),
-            "url": request.url._url,
+            "url": str(request.url),
         }
 
         # Add data
