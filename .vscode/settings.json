@@ -1,7 +1,6 @@
 {
-    "python.pythonPath": "/Users/luigiquaranta/.pyenv/versions/3.9.5/envs/fastAPI_demo/bin/python",
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": false,
-    "python.linting.mypyEnabled": true
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    }
 }

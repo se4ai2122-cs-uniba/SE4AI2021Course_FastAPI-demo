@@ -12,6 +12,14 @@ Install all project requirements with `uv`:
 uv sync
 ```
 
+## (Optional) Retrain the models
+
+The `models/` folder already contains two pickled models. Pickles are tied to the scikit-learn version that produced them, so if you upgrade scikit-learn, regenerate them:
+
+```bash
+uv run python scripts/train.py
+```
+
 ## Launch the server
 
 Use the FastAPI CLI via `uv` to launch the application in development mode (with auto-reload):
@@ -46,7 +54,7 @@ We can now test that the application is working. These are some of the possibili
   import requests
 
   response = requests.get("http://localhost:8000/")
-  print (json.loads(response.text))
+  print(json.loads(response.text))
   ```
 
 - use an external tool like [Postman](https://www.postman.com), which lets you execute and manage tests that can be saved and shared with others.

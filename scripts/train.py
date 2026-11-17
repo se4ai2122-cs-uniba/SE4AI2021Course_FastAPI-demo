@@ -2,7 +2,6 @@
 
 import pickle
 from pathlib import Path
-from typing import List
 
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
@@ -10,7 +9,8 @@ from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.svm import SVC
 
 MODELS_DIR = Path("models/")
-model_wrappers_list: List[dict] = []
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
+model_wrappers_list: list[dict] = []
 
 
 # ================ #
@@ -35,9 +35,9 @@ print("Creating logistic regression model...")
 # Define the Logistic Regression model
 LR_parameters = {
     "C": 0.1,
-    "max_iter": 20,
+    "max_iter": 200,
     "fit_intercept": True,
-    "solver": "liblinear",
+    "solver": "lbfgs",
     "random_state": 0,
 }
 LR_model = LogisticRegression(**LR_parameters)
@@ -101,7 +101,6 @@ print(SVC_model_dict, end="\n\n\n")
 print("Serializing model wrappers...")
 
 for wrapped_model in model_wrappers_list:
-
     pkl_filename = f"{wrapped_model['type']}_model.pkl"
     pkl_path = MODELS_DIR / pkl_filename
 
