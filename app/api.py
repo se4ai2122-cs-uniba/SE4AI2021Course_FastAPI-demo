@@ -11,6 +11,8 @@ from fastapi import FastAPI, Request
 
 from app.schemas import IrisType, PredictPayload
 
+import gradio as gr
+
 MODELS_DIR = Path("models/")
 model_wrappers_list: list[dict] = []
 
@@ -109,34 +111,54 @@ def _get_models_list(request: Request):
     return response
 
 
-@app.post("/models/{type}", tags=["Prediction"])
-@construct_response
-def _predict(request: Request, type: str, payload: PredictPayload):
-    """Classifies Iris flowers based on sepal and petal sizes."""
+def _predict_core(
+    type: str,
+    sepal_length: float,
+    sepal_width: float,
+    petal_length: float,
+    petal_width: float,
+) -> tuple[int, str]:
+    model_wrapper = next((m for m in model_wrappers_list if m["type"] == type), None)
 
     # sklearn's `predict()` methods expect a 2D array of shape [n_samples, n_features]
     # therefore, we need to convert our single data point into a 2D array
     features = [
         [
-            payload.sepal_length,
-            payload.sepal_width,
-            payload.petal_length,
-            payload.petal_width,
+            sepal_length,
+            sepal_width,
+            petal_length,
+            petal_width,
         ]
     ]
-
-    model_wrapper = next((m for m in model_wrappers_list if m["type"] == type), None)
 
     if model_wrapper:
         prediction = model_wrapper["model"].predict(features)
         prediction = int(prediction[0])
-        predicted_type = IrisType(prediction).name
+        predicted_type = str(IrisType(prediction).name)
+        return prediction, predicted_type
+    else:
+        raise ValueError(f"Model of type '{type}' not found.")
+
+
+@app.post("/models/{type}", tags=["Prediction"])
+@construct_response
+def _predict(request: Request, type: str, payload: PredictPayload):
+    """Classifies Iris flowers based on sepal and petal sizes."""
+
+    try:
+        prediction, predicted_type = _predict_core(
+            type=type,
+            sepal_length=payload.sepal_length,
+            sepal_width=payload.sepal_width,
+            petal_length=payload.petal_length,
+            petal_width=payload.petal_width,
+        )
 
         response = {
             "message": HTTPStatus.OK.phrase,
             "status-code": HTTPStatus.OK,
             "data": {
-                "model-type": model_wrapper["type"],
+                "model-type": type,
                 "features": {
                     "sepal_length": payload.sepal_length,
                     "sepal_width": payload.sepal_width,
@@ -147,9 +169,39 @@ def _predict(request: Request, type: str, payload: PredictPayload):
                 "predicted_type": predicted_type,
             },
         }
-    else:
+        return response
+    except ValueError as e:
         response = {
-            "message": "Model not found",
+            "message": str(e),
             "status-code": HTTPStatus.BAD_REQUEST,
         }
-    return response
+        return response
+
+
+inputs = [
+    gr.Dropdown(["LogisticRegression", "SVC"], label="Model Type", value="SVC"),
+    gr.Number(label="Sepal Length", value=6.4),
+    gr.Number(label="Sepal Width", value=2.8),
+    gr.Number(label="Petal Length", value=5.6),
+    gr.Number(label="Petal Width", value=2.1),
+]
+outputs = [
+    gr.Textbox(label="Predicted Class (0: setosa, 1: versicolor, 2: virginica)"),
+    gr.Textbox(label="Predicted Class Name"),
+]
+gradio_interface = gr.Interface(
+    title="Iris Flower Classifier",
+    description="Classifies Iris flowers based on sepal and petal sizes using a selected model.",
+    fn=_predict_core,
+    inputs=inputs,
+    outputs=outputs,
+    article="""
+    <p>This Gradio interface allows you to classify Iris flowers based on their sepal and petal sizes using a selected machine learning model.</p>
+    <p>Choose a model type from the dropdown, enter the sepal and petal dimensions, and click 'Submit' to see the predicted class and its name.</p>
+    <p>Model Types:</p>
+    <ul>
+        <li><strong>LogisticRegression</strong>: A linear model for classification.</li>
+        <li><strong>SVC</strong>: Support Vector Classifier, a powerful model for classification tasks.</li>
+    </ul> """,
+)
+app = gr.mount_gradio_app(app, gradio_interface, path="/gradio")
