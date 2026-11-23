@@ -1,42 +1,28 @@
 """Main script: it includes our API initialization and endpoints."""
 
-import pickle
 from contextlib import asynccontextmanager
 from datetime import datetime
 from functools import wraps
 from http import HTTPStatus
-from pathlib import Path
 
 from fastapi import FastAPI, Request
 
-from app.schemas import IrisType, PredictPayload
-
-MODELS_DIR = Path("models/")
-model_wrappers_list: list[dict] = []
+from app import core
+from app.schemas import PredictPayload
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Context manager to handle application lifespan events.
 
-    Used to load all pickled models found in `MODELS_DIR` and add them to `models_list`
+    Used to load all pickled models at startup and to discard them at shutdown.
     """
 
-    # Load all models
-    model_paths = [
-        filename for filename in MODELS_DIR.iterdir() if filename.suffix == ".pkl"
-    ]
-
-    for path in model_paths:
-        # Blocking I/O is fine here: it runs once, before the server accepts requests
-        with open(path, "rb") as file:  # noqa: ASYNC230
-            model_wrapper = pickle.load(file)
-            model_wrappers_list.append(model_wrapper)
+    core.load_models()
 
     yield
 
-    # Clean up the models list
-    model_wrappers_list.clear()
+    core.unload_models()
 
 
 # Define application
@@ -91,19 +77,10 @@ def _index(request: Request):
 def _get_models_list(request: Request):
     """Return the list of available models"""
 
-    available_models = [
-        {
-            "type": model["type"],
-            "parameters": model["params"],
-            "accuracy": model["metrics"],
-        }
-        for model in model_wrappers_list
-    ]
-
     response = {
         "message": HTTPStatus.OK.phrase,
         "status-code": HTTPStatus.OK,
-        "data": available_models,
+        "data": core.list_models(),
     }
 
     return response
@@ -114,42 +91,23 @@ def _get_models_list(request: Request):
 def _predict(request: Request, type: str, payload: PredictPayload):
     """Classifies Iris flowers based on sepal and petal sizes."""
 
-    # sklearn's `predict()` methods expect a 2D array of shape [n_samples, n_features]
-    # therefore, we need to convert our single data point into a 2D array
-    features = [
-        [
-            payload.sepal_length,
-            payload.sepal_width,
-            payload.petal_length,
-            payload.petal_width,
-        ]
-    ]
+    features = payload.model_dump()
 
-    model_wrapper = next((m for m in model_wrappers_list if m["type"] == type), None)
-
-    if model_wrapper:
-        prediction = model_wrapper["model"].predict(features)
-        prediction = int(prediction[0])
-        predicted_type = IrisType(prediction).name
-
-        response = {
-            "message": HTTPStatus.OK.phrase,
-            "status-code": HTTPStatus.OK,
-            "data": {
-                "model-type": model_wrapper["type"],
-                "features": {
-                    "sepal_length": payload.sepal_length,
-                    "sepal_width": payload.sepal_width,
-                    "petal_length": payload.petal_length,
-                    "petal_width": payload.petal_width,
-                },
-                "prediction": prediction,
-                "predicted_type": predicted_type,
-            },
-        }
-    else:
-        response = {
+    try:
+        iris_type = core.predict(type, **features)
+    except core.ModelNotFoundError:
+        return {
             "message": "Model not found",
             "status-code": HTTPStatus.BAD_REQUEST,
         }
-    return response
+
+    return {
+        "message": HTTPStatus.OK.phrase,
+        "status-code": HTTPStatus.OK,
+        "data": {
+            "model-type": type,
+            "features": features,
+            "prediction": iris_type.value,
+            "predicted_type": iris_type.name,
+        },
+    }
