@@ -96,8 +96,9 @@ The same models can be called by an LLM agent through the [Model Context Protoco
 | `app/core.py`       | Loads the models and makes predictions; knows no protocol        |
 | `app/api.py`        | Exposes the core as REST endpoints (FastAPI)                     |
 | `app/mcp_server.py` | Exposes the core as MCP tools (official `mcp` Python SDK)        |
+| `app/images.py`     | Loads an image from a path or URL and describes it; no protocol  |
 
-The MCP server offers two tools: `list_models` and `predict_iris`.
+The MCP server offers three tools: `list_models`, `predict_iris`, and `get_image_info`.
 
 **Observation**. A REST endpoint is read by a programmer; a tool is read by a language model. The tool's name, its docstring, and the descriptions of its parameters are all the model knows when deciding whether and how to call it, so they should be written with the same care as a prompt.
 
@@ -175,3 +176,15 @@ asyncio.run(main())
 3. Enable the `iris-classifier` server in the chat and try a prompt such as:
 
    > I measured an iris flower: the sepal is 6.4 cm long and 2.8 cm wide, the petal is 5.6 cm long and 2.1 cm wide. Which species is it? Use the most accurate model available.
+
+### Pass an image to a tool
+
+The third tool, `get_image_info`, shows how a tool can work on an image. It only reads the image's properties with [Pillow](https://pillow.readthedocs.io) (format, width, height, resolution), but a tool that serves an image model, e.g., a classifier, has the same shape: load the image, run the model, return its prediction.
+
+**Observation**. The arguments of a tool call are JSON written by the language model, and a model cannot copy the bytes of an image into them. Attaching an image to the chat shows it to the model (if the model supports vision), but does not make it available to the tools. So the image is passed _by reference_: we tell the model where the image is, the model passes that location to the tool, and the server fetches the image. A local path works because a stdio server runs on our own machine; a server deployed elsewhere could only accept a URL.
+
+Try prompts such as:
+
+> What are the dimensions and the resolution of the image at /absolute/path/to/photo.jpg?
+
+> Tell me the format and the dimensions of this image: https://www.python.org/static/img/python-logo.png

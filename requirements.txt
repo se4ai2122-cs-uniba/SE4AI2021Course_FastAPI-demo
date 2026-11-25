@@ -76,6 +76,7 @@ httpx==0.28.1
     # via
     #   fastapi
     #   fastapi-cloud-cli
+    #   fastapi-demo
 httpx2==2.16.2
     # via
     #   fastapi
@@ -144,6 +145,8 @@ opentelemetry-sdk==1.45.2
     #   opentelemetry-exporter-otlp-proto-http
 opentelemetry-semantic-conventions==0.66b2
     # via opentelemetry-sdk
+pillow==13.0.0
+    # via fastapi-demo
 protobuf==7.36.2
     # via
     #   googleapis-common-protos
